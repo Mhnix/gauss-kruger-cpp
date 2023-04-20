@@ -17,32 +17,6 @@ namespace po = boost::program_options;
 
 #define EXE_NAME "gausskruger"
 
-class ParameterProjection : public Projection
-{
-public:
-    ParameterProjection(double flattening, double equatorialRadius, double centralMeridian,
-            double scale, double falseNorthing, double falseEasting) :
-        mFlattening(flattening),
-        mEquatorialRadius(equatorialRadius),
-        mCentralMeridian(centralMeridian),
-        mScale(scale),
-        mFalseNorthing(falseNorthing),
-        mFalseEasting(falseEasting) {}
-    double flattening() { return mFlattening; }
-    double equatorialRadius() { return mEquatorialRadius; }
-    double centralMeridian() { return mCentralMeridian; }
-    double scale() { return mScale; }
-    double falseNorthing() { return mFalseNorthing; }
-    double falseEasting() { return mFalseEasting; }
-private:
-    double mFlattening;
-    double mEquatorialRadius;
-    double mCentralMeridian;
-    double mScale;
-    double mFalseNorthing;
-    double mFalseEasting;
-};
-
 int main(int argc, char *argv[])
 {
     double inverseFlattening;
@@ -122,15 +96,13 @@ int main(int argc, char *argv[])
         std::cout.precision(nDecimals);
 
         // Do the actual transformation
-        ParameterProjection projection(1 / inverseFlattening, equatorialRadius,
-                centralMeridian, scale, falseNorthing, falseEasting);
+        Projection projection{ {1 / inverseFlattening, equatorialRadius },
+                centralMeridian, scale, falseNorthing, falseEasting};
         if (vm.count("reverse")) {
-            double lat, lon;
-            projection.gridToGeodetic(coords.at(0), coords.at(1), lat, lon);
+            auto [ lat, lon ] = gridToGeodetic<projection>({ coords.at(0), coords.at(1) });
             std::cout << std::fixed << "Latitude: " << lat << "\nLongitude: " << lon << std::endl;
         } else {
-            double northing, easting;
-            projection.geodeticToGrid(coords.at(0), coords.at(1), northing, easting);
+            auto [ northing, easting ] = geodeticToGrid<projection>({ coords.at(0), coords.at(1) });
             std::cout << std::fixed << "Northing: " << northing << "\nEasting: " << easting << std::endl;
         }
     } catch (std::exception& e) {

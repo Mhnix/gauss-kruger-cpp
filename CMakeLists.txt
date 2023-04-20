@@ -9,9 +9,7 @@ option(BUILD_CLI "Build CLI application")
 
 add_compile_options(-Wall -Wextra -pedantic -Werror -Wnarrowing)
 
-add_library(gausskruger
-  gausskruger.cpp
-)
+add_library(gausskruger INTERFACE)
 
 set_target_properties(gausskruger PROPERTIES PUBLIC_HEADER gausskruger.h)
 target_include_directories(gausskruger
